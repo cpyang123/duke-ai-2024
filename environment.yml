@@ -173,7 +173,6 @@ dependencies:
       - joblib==1.4.2
       - jsonpickle==3.3.0
       - kiwisolver==1.4.7
-      - lightrag-hku==0.0.8
       - llvmlite==0.43.0
       - markupsafe==3.0.2
       - matplotlib==3.9.2

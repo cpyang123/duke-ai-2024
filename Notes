@@ -1,0 +1,5 @@
+1. conda create --name dukehackenv python=3.10
+2. conda activate dukehackenv
+3. For MacOS users --> export HNSWLIB_NO_NATIVE=1  
+4. pip install e .
+5. conda env create -f environment.yaml
