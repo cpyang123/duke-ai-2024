@@ -2,3 +2,5 @@
 2. conda activate dukehackenv
 3. conda install conda-forge::hnswlib
 4. pip install e .
+5. pip install textract or pip install textract-py3
+7. pip install python-dotenv
