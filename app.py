@@ -6,7 +6,8 @@ import shelve
 from lightrag import LightRAG, QueryParam
 from lightrag.llm import gpt_4o_mini_complete, gpt_4o_complete
 import textract
-
+from unstructured.partition.auto import partition
+import glob
 
 load_dotenv()
 
@@ -15,8 +16,6 @@ st.title("Duke ProfMatch")
 USER_AVATAR = "👤"
 BOT_AVATAR = "🤖"
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-
-
 
 # Set up LightRAG
 WORKING_DIR = "./data/Affiliations/"
@@ -39,11 +38,33 @@ rag = LightRAG(
     # llm_model_func=gpt_4o_complete  # Optionally, use a stronger model
 )
 
-
-
 # Ensure openai_model is initialized in session state
 if "openai_model" not in st.session_state:
     st.session_state["openai_model"] = "gpt-4o-mini"
+
+
+def add_logo():
+    return st.markdown(
+        """
+        <style>
+            [data-testid="stSidebarNav"] {
+                background-image: "./static/duke_match.png";
+                background-repeat: no-repeat;
+                padding-top: 120px;
+                background-position: 20px 20px;
+            }
+            [data-testid="stSidebarNav"]::before {
+                content: "";
+                margin-left: 20px;
+                margin-top: 20px;
+                font-size: 30px;
+                position: relative;
+                top: 100px;
+            }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
 
 
 # Load chat history from shelve file
@@ -60,17 +81,37 @@ def save_chat_history(messages):
 # Initialize or load chat history
 if "messages" not in st.session_state:
     st.session_state.messages = load_chat_history()
+    
+st.logo("./static/duke_match2.png", size = "large")
 
 # Sidebar with a button to delete chat history
 with st.sidebar:
+    
     if st.button("Delete Chat History"):
         st.session_state.messages = []
         save_chat_history([])
     if st.button("Reload LightRAG"):
+        # Find all JSON and GraphML files in the specified folder
+        file_patterns = ['*.json', '*.graphml']
+        files_to_delete = []
+
+        # Gather all files matching the specified patterns
+        for pattern in file_patterns:
+            files_to_delete.extend(glob.glob(os.path.join(WORKING_DIR, pattern)))
+
+        # Loop through and delete each JSON file
+        for file_path in files_to_delete:
+            try:
+                os.remove(file_path)
+                print(f"Deleted: {file_path}")
+            except Exception as e:
+                print(f"Error deleting {file_path}: {e}")
         rag.insert(text_content.decode('utf-8'))
-    # uploaded_file = st.file_uploader('Upload your profile here:', type="pdf")
-    # if uploaded_file is not None:
-    #     df = extract_data(uploaded_file)
+    uploaded_file = st.file_uploader('Upload your resume/cv here:', type="pdf")
+    if uploaded_file is not None:
+        file_elements = partition(file = uploaded_file)
+        processed_file = "This should be a special case for the embedding. Make a special graph attribute as 'Me': \n" + "\n".join([str(i) for i in file_elements])
+        rag.insert(processed_file)
 
 # Display chat messages
 for message in st.session_state.messages:
