@@ -42,31 +42,6 @@ rag = LightRAG(
 if "openai_model" not in st.session_state:
     st.session_state["openai_model"] = "gpt-4o-mini"
 
-
-def add_logo():
-    return st.markdown(
-        """
-        <style>
-            [data-testid="stSidebarNav"] {
-                background-image: "./static/duke_match.png";
-                background-repeat: no-repeat;
-                padding-top: 120px;
-                background-position: 20px 20px;
-            }
-            [data-testid="stSidebarNav"]::before {
-                content: "";
-                margin-left: 20px;
-                margin-top: 20px;
-                font-size: 30px;
-                position: relative;
-                top: 100px;
-            }
-        </style>
-        """,
-        unsafe_allow_html=True,
-    )
-
-
 # Load chat history from shelve file
 def load_chat_history():
     with shelve.open("chat_history") as db:
@@ -86,7 +61,6 @@ st.logo("./static/duke_match2.png", size = "large")
 
 # Sidebar with a button to delete chat history
 with st.sidebar:
-    
     if st.button("Delete Chat History"):
         st.session_state.messages = []
         save_chat_history([])
@@ -112,6 +86,8 @@ with st.sidebar:
         file_elements = partition(file = uploaded_file)
         processed_file = "This should be a special case for the embedding. Make a special graph attribute as 'Me': \n" + "\n".join([str(i) for i in file_elements])
         rag.insert(processed_file)
+        
+
 
 # Display chat messages
 for message in st.session_state.messages:
@@ -140,6 +116,11 @@ if prompt := st.chat_input("How can I help your research?"):
         # message_placeholder.markdown(full_response + "|")
         message_placeholder.markdown(full_response)
     st.session_state.messages.append({"role": "assistant", "content": full_response})
+
+    with st.container():
+        st.header('Dashboard Card Title')
+        st.text('Some interesting insights')
+        # st.line_chart(data)
 
 # Save chat history after each interaction
 save_chat_history(st.session_state.messages)
