@@ -3,3 +3,4 @@ env
 *lib
 *data/*
 data
+.env
